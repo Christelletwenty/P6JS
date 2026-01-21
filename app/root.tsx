@@ -1,5 +1,6 @@
 import {
   isRouteErrorResponse,
+  Link,
   Links,
   Meta,
   Outlet,
@@ -42,6 +43,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  <div>
+    <nav>
+      <Link to="/">Home</Link>
+      <Link to="/profile">Mon profile</Link>
+      <Link to="/login">Connexion</Link>
+      <Link to="/dashboard">Dashboard</Link>
+    </nav>
+  </div>;
+
   return <Outlet />;
 }
 
