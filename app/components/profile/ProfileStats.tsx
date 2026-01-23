@@ -48,14 +48,40 @@ function ProfileStats({ sessions }: ProfileStatsProps) {
 
   // render
   return (
-    <section>
-      <h2>Vos statistiques{startDate ? ` depuis le ${startDate}` : ""}</h2>
+    <section className="stats">
+      <header className="stats-header">
+        <h2 className="stats-title">Vos statistiques</h2>
+        <p className="stats-subtitle">
+          {startDate ? `depuis le ${startDate}` : ""}
+        </p>
+      </header>
 
-      <p>Nombre de sessions : {sessions.length}</p>
-      <p>Temps total couru : {totalDuration} min</p>
-      <p>Distance totale parcourue : {totalDistance.toFixed(1)} km</p>
-      <p>Calories brûlées : {totalCalories} kcal</p>
-      <p>Nombre de jours de repos : {restDays}</p>
+      <div className="stats-grid">
+        <div className="stat-card">
+          <p className="stat-label">Temps total couru</p>
+          <p className="stat-value">{totalDuration} min</p>
+        </div>
+
+        <div className="stat-card">
+          <p className="stat-label">Calories brûlées</p>
+          <p className="stat-value">{totalCalories} kcal</p>
+        </div>
+
+        <div className="stat-card">
+          <p className="stat-label">Distance totale parcourue</p>
+          <p className="stat-value">{totalDistance.toFixed(1)} km</p>
+        </div>
+
+        <div className="stat-card">
+          <p className="stat-label">Nombre de jours de repos</p>
+          <p className="stat-value">{restDays} jours</p>
+        </div>
+
+        <div className="stat-card stat-card--wide">
+          <p className="stat-label">Nombre de sessions</p>
+          <p className="stat-value">{sessions.length} sessions</p>
+        </div>
+      </div>
     </section>
   );
 }

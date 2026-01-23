@@ -11,19 +11,32 @@ function ProfileHeader({ user }: ProfileHeaderProps) {
 
   // render
   return (
-    <section>
-      <img src={user.profilePicture} alt="Profile picture" />
+    <section className="profile-header">
+      <div className="profile-card profile-card--identity">
+        <img
+          className="profile-avatar"
+          src={user.profilePicture}
+          alt="Profile picture"
+        />
 
-      <h1>
-        {user.firstName} {user.lastName}
-      </h1>
-      <p>Membre depuis le {user.createdAt}</p>
+        <div className="profile-identity">
+          <h1 className="profile-name">
+            {user.firstName} {user.lastName}
+          </h1>
+          <p className="profile-since">Membre depuis le {user.createdAt}</p>
+        </div>
+      </div>
 
-      <h2>Votre profil</h2>
-      <p>Âge : {user.age}</p>
-      <p>Genre : {user.gender}</p>
-      <p>Taille : {user.height}cm</p>
-      <p>Poids : {user.weight}kg</p>
+      <div className="profile-card profile-card--info">
+        <h2 className="profile-section-title">Votre profil</h2>
+        <hr className="profile-separator" />
+        <ul className="profile-info-list">
+          <li>Âge : {user.age}</li>
+          <li>Genre : {user.gender}</li>
+          <li>Taille : {user.height} cm</li>
+          <li>Poids : {user.weight} kg</li>
+        </ul>
+      </div>
     </section>
   );
 }

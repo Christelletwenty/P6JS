@@ -1,22 +1,25 @@
 import { useState } from "react";
 
 type LoginProfileFormProps = {
-  onSubmit?: (data: { email: string; password: string }) => void;
+  onSubmit?: (data: { username: string; password: string }) => void;
+  loading?: boolean;
+  error?: string | null;
 };
 
-function LoginProfileForm({ onSubmit }: LoginProfileFormProps) {
+function LoginProfileForm({
+  onSubmit,
+  loading = false,
+  error = null,
+}: LoginProfileFormProps) {
   // state
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   // comportements
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    onSubmit?.({ email, password });
-
-    // pour debug temporaire
-    console.log("login submit", { email, password });
+    onSubmit?.({ username, password });
   };
 
   // render
@@ -28,10 +31,11 @@ function LoginProfileForm({ onSubmit }: LoginProfileFormProps) {
         <div>
           <label>Adresse email</label>
           <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
+            disabled={loading}
           />
         </div>
         <div>
@@ -41,9 +45,13 @@ function LoginProfileForm({ onSubmit }: LoginProfileFormProps) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            disabled={loading}
           />
         </div>
-        <button type="submit">Se connecter</button>
+        {error && <p>{error}</p>}
+        <button type="submit">
+          {loading ? "Connexion..." : "Se connecter"}
+        </button>
         <p>Mot de passe oublié ?</p>
       </form>
     </section>
