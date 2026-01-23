@@ -19,11 +19,25 @@ function Menu() {
 
       <nav className="topbar-nav">
         <ul className="topbar-links">
-          <li>Dashboard</li>
-          <li>Mon profil</li>
+          <li>
+            <Link to="/dashboard">Dashboard</Link>
+          </li>
+          <li>
+            <Link to="/profile">Mon profil</Link>
+          </li>
           <li className="topbar-sep">|</li>
           <li>
-            <button className="logout-btn">Se déconnecter</button>
+            {isAuthenticated ? (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="menu__logout"
+              >
+                Se déconnecter
+              </button>
+            ) : (
+              <Link to="/login">Se connecter</Link>
+            )}
           </li>
         </ul>
       </nav>
