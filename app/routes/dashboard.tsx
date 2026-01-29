@@ -73,7 +73,7 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className="grid2">
-            <WeeklyDistanceChart sessions={sessions ?? []} />
+            <WeeklyDistanceChart />
             <WeeklyActivityChart />
           </div>
         )}

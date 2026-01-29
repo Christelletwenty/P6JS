@@ -8,67 +8,187 @@ import {
   YAxis,
   Legend,
 } from "recharts";
+import { useMemo, useState } from "react";
 import type { RunningSession } from "~/types/profile";
-
-type Props = { sessions: RunningSession[] };
+import { useAuth } from "~/contexts/AuthContext";
+import { useUserActivity } from "~/hooks/useUserActivity";
 
 type Point = { week: string; km: number };
 
-function startOfWeek(d: Date): Date {
+// --- helpers UTC (comme ton autre chart) ---
+function startOfWeekMondayUTC(d: Date): Date {
   const x = new Date(d);
-  const day = (x.getDay() + 6) % 7; // lundi=0
-  x.setDate(x.getDate() - day);
-  x.setHours(0, 0, 0, 0);
+  const day = (x.getUTCDay() + 6) % 7; // lun=0
+  x.setUTCDate(x.getUTCDate() - day);
+  x.setUTCHours(12, 0, 0, 0);
   return x;
 }
 
-function toISODate(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const da = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${da}`;
+function addWeeksUTC(d: Date, weeks: number): Date {
+  const x = new Date(d);
+  x.setUTCDate(x.getUTCDate() + weeks * 7);
+  return x;
 }
 
-function buildWeekly(sessions: RunningSession[]): Point[] {
-  // range = 4 semaines glissantes depuis la semaine courante
-  const now = new Date();
-  const w0 = startOfWeek(now);
-  const weeks = [3, 2, 1, 0].map((n) => {
-    const d = new Date(w0);
-    d.setDate(d.getDate() - n * 7);
-    return d;
-  });
+function addDaysUTC(d: Date, days: number): Date {
+  const x = new Date(d);
+  x.setUTCDate(x.getUTCDate() + days);
+  return x;
+}
 
-  const totals = new Map<string, number>();
-  for (const w of weeks) totals.set(toISODate(w), 0);
+function parseSessionDate(dateStr: string): Date {
+  // robuste: ignore T...Z et évite les décalages
+  const key = dateStr.slice(0, 10);
+  const [y, m, d] = key.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+}
+
+function buildWeeklyDistance4Weeks(
+  sessions: RunningSession[],
+  windowStart: Date, // lundi S-3
+): Point[] {
+  // 4 semaines: S1..S4, où S4 = semaine de fin de la fenêtre
+  const weeks = [0, 1, 2, 3].map((i) => addWeeksUTC(windowStart, i));
+
+  const totals = new Map<number, number>();
+  for (const w of weeks) totals.set(w.getTime(), 0);
 
   for (const s of sessions) {
-    const sd = new Date(`${s.date}T00:00:00`);
-    const sw = toISODate(startOfWeek(sd));
+    const sd = parseSessionDate(s.date);
+    const sw = startOfWeekMondayUTC(sd).getTime();
     if (totals.has(sw)) totals.set(sw, (totals.get(sw) ?? 0) + s.distanceKm);
   }
 
-  return weeks.map((w, idx) => ({
-    week: `S${idx + 1}`,
-    km: Number((totals.get(toISODate(w)) ?? 0).toFixed(1)),
-  }));
+  return weeks.map((w, idx) => {
+    const km = totals.get(w.getTime()) ?? 0;
+    return { week: `S${idx + 1}`, km: Number(km.toFixed(1)) };
+  });
 }
 
-export default function WeeklyDistanceChart({ sessions }: Props) {
-  const data = buildWeekly(sessions);
+function formatRangeFr(start: Date, endExclusive: Date): string {
+  const end = addDaysUTC(endExclusive, -1);
+  const fmt = new Intl.DateTimeFormat("fr-FR", {
+    day: "2-digit",
+    month: "short",
+  });
+  const a = fmt.format(start).replace(".", "");
+  const b = fmt.format(end).replace(".", "");
+  return `${a} - ${b}`;
+}
+
+export default function WeeklyDistanceChart() {
+  const { token } = useAuth();
+
+  // 0 = fenêtre qui se termine cette semaine (S4 = cette semaine)
+  const [weekEndOffset, setWeekEndOffset] = useState(0);
+
+  // ✅ IMPORTANT: stable, sinon boucle (new Date() à chaque render)
+  const todayWeekStart = useMemo(() => startOfWeekMondayUTC(new Date()), []);
+
+  // lundi de la semaine de fin (dépend de weekEndOffset)
+  const endWeekStart = useMemo(
+    () => addWeeksUTC(todayWeekStart, weekEndOffset),
+    [todayWeekStart, weekEndOffset],
+  );
+
+  // fenêtre = 4 semaines glissantes : [lundi S-3, lundi S+1)
+  const windowStart = useMemo(
+    () => addWeeksUTC(endWeekStart, -3),
+    [endWeekStart],
+  );
+  const windowEndExclusive = useMemo(
+    () => addWeeksUTC(endWeekStart, 1),
+    [endWeekStart],
+  );
+
+  // fetch exactement la fenêtre 4 semaines
+  const { sessions, loading, error } = useUserActivity(
+    token,
+    windowStart,
+    windowEndExclusive,
+  );
+
+  const data = useMemo(
+    () => buildWeeklyDistance4Weeks(sessions, windowStart),
+    [sessions, windowStart],
+  );
+
   const avg =
     data.length > 0
       ? Number((data.reduce((a, b) => a + b.km, 0) / data.length).toFixed(1))
       : 0;
 
+  // navigation (pas de futur)
+  const canNext = endWeekStart.getTime() < todayWeekStart.getTime();
+  const canPrev = true; // tu peux limiter si tu veux
+
+  const rangeLabel = useMemo(
+    () => formatRangeFr(windowStart, windowEndExclusive),
+    [windowStart, windowEndExclusive],
+  );
+
   return (
     <div className="card">
-      <div className="card-header">
+      <div
+        className="card-header"
+        style={{ display: "flex", justifyContent: "space-between", gap: 12 }}
+      >
         <div>
           <div className="card-big">{avg}km en moyenne</div>
           <div className="card-sub">
-            Total des kilomètres 4 dernières semaines
+            Total des kilomètres (fenêtre 4 semaines)
           </div>
+          {loading && (
+            <div style={{ fontSize: 12, color: "#6B7280", marginTop: 4 }}>
+              Chargement…
+            </div>
+          )}
+          {error && (
+            <div style={{ fontSize: 12, color: "#B91C1C", marginTop: 4 }}>
+              {error}
+            </div>
+          )}
+        </div>
+
+        {/* ✅ Navigation + label AU MILIEU */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <button
+            type="button"
+            aria-label="Fenêtre précédente"
+            onClick={() => canPrev && setWeekEndOffset((x) => x - 1)}
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 999,
+              border: "1px solid #E5E7EB",
+              background: "white",
+              cursor: "pointer",
+            }}
+          >
+            ‹
+          </button>
+
+          <div style={{ color: "#111827", fontSize: 14, whiteSpace: "nowrap" }}>
+            {rangeLabel}
+          </div>
+
+          <button
+            type="button"
+            aria-label="Fenêtre suivante"
+            onClick={() => canNext && setWeekEndOffset((x) => x + 1)}
+            disabled={!canNext}
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 999,
+              border: "1px solid #E5E7EB",
+              background: "white",
+              opacity: canNext ? 1 : 0.4,
+              cursor: canNext ? "pointer" : "default",
+            }}
+          >
+            ›
+          </button>
         </div>
       </div>
 
@@ -100,8 +220,7 @@ export default function WeeklyDistanceChart({ sessions }: Props) {
               axisLine={{ stroke: "#6B7280", strokeWidth: 1 }}
               tick={{ fill: "#6B7280", fontSize: 12 }}
               width={34}
-              domain={[0, 32]}
-              ticks={[0, 10, 20, 30]}
+              domain={[0, "dataMax + 5"]}
             />
 
             <Tooltip
