@@ -31,7 +31,7 @@ function Menu() {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="menu__logout"
+                className="logout-btn"
               >
                 Se déconnecter
               </button>
