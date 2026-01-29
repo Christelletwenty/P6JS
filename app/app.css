@@ -522,3 +522,82 @@ footer ul {
 footer p {
   margin: 0;
 }
+
+/* CSS POUR LE NOT FOUND */
+
+/* 404 */
+.nf-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #f5f7fb;
+}
+
+.nf-card {
+  width: min(560px, 100%);
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.nf-badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 0, 0, 0.08);
+  color: #b00020;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  margin-bottom: 12px;
+}
+
+.nf-title {
+  margin: 0 0 10px;
+  font-size: 28px;
+}
+
+.nf-text {
+  margin: 0 0 18px;
+  color: rgba(0, 0, 0, 0.7);
+  line-height: 1.5;
+}
+
+.nf-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.nf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.nf-btn-primary {
+  background: #1a73e8;
+  color: white;
+  border-color: transparent;
+}
+
+.nf-btn-primary:hover {
+  filter: brightness(0.97);
+}
+
+.nf-btn-ghost {
+  background: transparent;
+  color: rgba(0, 0, 0, 0.78);
+}
+
+.nf-btn-ghost:hover {
+  background: rgba(0, 0, 0, 0.04);
+}

@@ -2,6 +2,7 @@ import { useAuth } from "~/contexts/AuthContext";
 import { useUserInfo } from "~/hooks/useUserInfo";
 import { useHydrated } from "~/hooks/useHydrated";
 import { useUserActivity } from "~/hooks/useUserActivity";
+import { useRequireAuth } from "~/hooks/useRequireAuth";
 
 import Menu from "~/components/layout/Menu";
 import Footer from "~/components/layout/Footer";
@@ -17,14 +18,25 @@ function sumMin(s: { durationMin: number }[]) {
 }
 
 export default function DashboardPage() {
+  const { isAuthenticated } = useRequireAuth();
   const hydrated = useHydrated();
-  const { token, isAuthenticated, clearAuth } = useAuth();
+  const { token, clearAuth } = useAuth();
   const { data: userInfo } = useUserInfo(token);
   const profile = userInfo?.profile;
   const stats = userInfo?.statistics;
 
   // Hook actuel charge déjà 7 jours. OK pour "Cette semaine".
   const { loading, error, sessions, params } = useUserActivity(token);
+
+  if (!isAuthenticated) {
+    return (
+      <main className="dashboard-page">
+        <div className="container">
+          <div className="card">Redirection…</div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="dashboard-page">

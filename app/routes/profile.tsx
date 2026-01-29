@@ -5,11 +5,23 @@ import Footer from "~/components/layout/Footer";
 import { useAuth } from "~/contexts/AuthContext";
 import { useUserInfo } from "~/hooks/useUserInfo";
 import { useUserActivity } from "~/hooks/useUserActivity";
+import { useRequireAuth } from "~/hooks/useRequireAuth";
 
 export default function Profile() {
+  const { isAuthenticated } = useRequireAuth();
   const auth = useAuth();
   const userInfo = useUserInfo(auth.token).data;
   const userStats = useUserActivity(auth.token).sessions;
+
+  if (!isAuthenticated) {
+    return (
+      <main className="dashboard-page">
+        <div className="container">
+          <div className="card">Redirection…</div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <div className="profile-page">
