@@ -32,7 +32,7 @@ export function useUserActivity(
     const endEx = endDateExclusive ?? addDaysUTC(new Date(), 1); // demain (exclusif)
     const start = startDate ?? addDaysUTC(endEx, -7);
 
-    // ton API semble vouloir endWeek inclusif : on convertit endExclusive -> endInclusif
+    // on convertit endExclusive -> endInclusif
     const endInclusive = addDaysUTC(endEx, -1);
 
     return {

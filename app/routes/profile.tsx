@@ -25,7 +25,6 @@ export default function Profile() {
         </div>
 
         <div className="profile-right">
-          {/*  */}
           {userStats ? (
             <ProfileStats sessions={userStats} />
           ) : (

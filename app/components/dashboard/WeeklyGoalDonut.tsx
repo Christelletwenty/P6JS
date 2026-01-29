@@ -69,7 +69,7 @@ export default function WeeklyGoalDonut({ done, goal }: Props) {
         </ResponsiveContainer>
       </div>
 
-      {/* Légende (comme ta maquette) */}
+      {/* Légende */}
       <div className="pie-legend">
         <div className="item">
           <span className="dot" style={{ background: "#0B23F4" }} />

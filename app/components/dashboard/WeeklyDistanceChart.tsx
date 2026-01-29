@@ -15,7 +15,6 @@ import { useUserActivity } from "~/hooks/useUserActivity";
 
 type Point = { week: string; km: number };
 
-// --- helpers UTC (comme ton autre chart) ---
 function startOfWeekMondayUTC(d: Date): Date {
   const x = new Date(d);
   const day = (x.getUTCDay() + 6) % 7; // lun=0
@@ -37,7 +36,6 @@ function addDaysUTC(d: Date, days: number): Date {
 }
 
 function parseSessionDate(dateStr: string): Date {
-  // robuste: ignore T...Z et évite les décalages
   const key = dateStr.slice(0, 10);
   const [y, m, d] = key.split("-").map(Number);
   return new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
@@ -82,7 +80,6 @@ export default function WeeklyDistanceChart() {
   // 0 = fenêtre qui se termine cette semaine (S4 = cette semaine)
   const [weekEndOffset, setWeekEndOffset] = useState(0);
 
-  // ✅ IMPORTANT: stable, sinon boucle (new Date() à chaque render)
   const todayWeekStart = useMemo(() => startOfWeekMondayUTC(new Date()), []);
 
   // lundi de la semaine de fin (dépend de weekEndOffset)
@@ -120,7 +117,7 @@ export default function WeeklyDistanceChart() {
 
   // navigation (pas de futur)
   const canNext = endWeekStart.getTime() < todayWeekStart.getTime();
-  const canPrev = true; // tu peux limiter si tu veux
+  const canPrev = true;
 
   const rangeLabel = useMemo(
     () => formatRangeFr(windowStart, windowEndExclusive),
@@ -150,7 +147,7 @@ export default function WeeklyDistanceChart() {
           )}
         </div>
 
-        {/* ✅ Navigation + label AU MILIEU */}
+        {/* Navigation + label AU MILIEU */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <button
             type="button"

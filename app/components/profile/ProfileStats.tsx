@@ -9,12 +9,6 @@ function toDateOnly(dateStr: string): Date {
   return new Date(`${dateStr}T00:00:00`);
 }
 
-/* function daysBetweenInclusive(start: Date, end: Date): number {
-  const msPerDay = 24 * 60 * 60 * 1000;
-  const diffDays = Math.round((end.getTime() - start.getTime()) / msPerDay);
-  return diffDays + 1; // inclusif: start et end comptent
-} */
-
 function ProfileStats({ sessions }: ProfileStatsProps) {
   // state
 

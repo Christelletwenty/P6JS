@@ -24,10 +24,9 @@ type Point = {
 
 const DAYS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"] as const;
 
-// --- helpers date en UTC ---
 function startOfWeekMondayUTC(d: Date): Date {
   const x = new Date(d);
-  const day = (x.getUTCDay() + 6) % 7; // lun=0
+  const day = (x.getUTCDay() + 6) % 7;
   x.setUTCDate(x.getUTCDate() - day);
   x.setUTCHours(12, 0, 0, 0);
   return x;
@@ -54,7 +53,6 @@ function formatRangeFr(start: Date, endExclusive: Date): string {
   return `${a} - ${b}`;
 }
 
-// --- mapping sessions -> points ---
 function parseSessionDate(dateStr: string): Date {
   const key = dateStr.slice(0, 10);
   const [y, m, d] = key.split("-").map(Number);
@@ -127,7 +125,7 @@ export default function HeartRateWeeklyChart() {
   const canPrev = weekOffset > 0;
   const canNext = weekStart.getTime() < todayWeekStart.getTime();
 
-  // ✅ Fetch piloté par la semaine affichée
+  // Fetch piloté par la semaine affichée
   const { sessions, loading, error } = useUserActivity(
     token,
     weekStart,
